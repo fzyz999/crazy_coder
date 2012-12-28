@@ -15,18 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*!
- * \title Lucky-OIer
- * \page index.html
- * \section1 Description
- *      a ide for OIers and students who are learning to write programs.
- * \list
- * \o \l widget
- * \second
- * \endlist
- *
- */
-
 #include <QApplication>
 #include "mainwindow.h"
 
