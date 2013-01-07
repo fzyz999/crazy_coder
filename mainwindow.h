@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "codeeditor.h"
 
 class MainWindow : public QMainWindow
 {
