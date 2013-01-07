@@ -16,7 +16,6 @@
  * \brief set the background color of the LinenumArea. The font color of it will be compute automatically according to the background color.
  * \param color the color of the background.
 */
-
 class CodeEditorConfig
 {
 public:
@@ -26,6 +25,7 @@ public:
 
 private:
     CodeEditorConfig(); //to prevent CodeEditorConfig class from being instantiated.
+
     static QColor linenumAreaBackgroundColor;
     static QColor linenumAreaFontColor;
 };

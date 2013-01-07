@@ -5,6 +5,7 @@ QColor CodeEditorConfig::linenumAreaBackgroundColor=QColor(Qt::lightGray);
 QColor CodeEditorConfig::linenumAreaFontColor=QColor(0xff-linenumAreaBackgroundColor.red(),
                                                      0xff-linenumAreaBackgroundColor.green(),
                                                      0xff-linenumAreaBackgroundColor.blue());
+
 void CodeEditorConfig::setLinenumAreaColor(QColor &color)
 {
     linenumAreaBackgroundColor=color;
