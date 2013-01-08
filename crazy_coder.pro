@@ -4,9 +4,11 @@ OTHER_FILES += \
 
 HEADERS += \
     mainwindow.h \
-    codeeditor.h
+    codeeditor.h \
+    tabmanager.h
 
 SOURCES += \
     mainwindow.cpp \
     main.cpp \
-    codeeditor.cpp
+    codeeditor.cpp \
+    tabmanager.cpp

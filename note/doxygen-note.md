@@ -57,4 +57,9 @@ Unix Man Page
 >*  Detailed description starts here.
 >*/
 　　其余方式详见doxygen文档。
-
+　　其他在注释块中常用的命令：
+        \\mainpage 主页
+        \\class 类名
+        \\fn 函数名
+        \\struct 结构体名
+        \\union 联合名
