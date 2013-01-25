@@ -20,8 +20,6 @@ public:
     {
         keywords,
         numbers,
-        functions,
-        variables,
         comments,
         preprocess
     };
@@ -35,9 +33,7 @@ public:
 private:
     LexerConfig(){}
     static QTextCharFormat keywordsFormat;
-    static QTextCharFormat numberssFormat;
-    static QTextCharFormat functionsFormat;
-    static QTextCharFormat variablesFormat;
+    static QTextCharFormat numbersFormat;
     static QTextCharFormat commentsFormat;
     static QTextCharFormat preprocessFormat;
 };
@@ -56,6 +52,7 @@ protected:
 private:
     QList<QRegExp> keywords_datatype;
     QList<QRegExp> keywords_others;
+
 };
 
 #endif // CPPLEXER_H

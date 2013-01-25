@@ -1,9 +1,7 @@
 #include "cpplexer.h"
 
 QTextCharFormat LexerConfig::keywordsFormat;
-QTextCharFormat LexerConfig::numberssFormat;
-QTextCharFormat LexerConfig::functionsFormat;
-QTextCharFormat LexerConfig::variablesFormat;
+QTextCharFormat LexerConfig::numbersFormat;
 QTextCharFormat LexerConfig::commentsFormat;
 QTextCharFormat LexerConfig::preprocessFormat;
 
@@ -28,6 +26,12 @@ void LexerConfig::setup()
     preprocessFormat.setForeground(settings.value("Foreground",Qt::darkGreen).value<QBrush>());
     preprocessFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
     preprocessFormat.setFontItalic(settings.value("FontItalic",false).toBool());
+    settings.endGroup();
+
+    settings.beginGroup("numbers");
+    numbersFormat.setForeground(settings.value("Foreground",Qt::darkBlue).value<QBrush>());
+    numbersFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
+    numbersFormat.setFontItalic(settings.value("FontItalic",false).toBool());
     settings.endGroup();
 
     settings.endGroup();
@@ -56,6 +60,12 @@ void LexerConfig::shutdown()
     settings.setValue("FontItalic",preprocessFormat.fontItalic());
     settings.endGroup();
 
+    settings.beginGroup("numbers");
+    settings.setValue("Foreground",numbersFormat.foreground());
+    settings.setValue("FontWeight",numbersFormat.fontWeight());
+    settings.setValue("FontItalic",numbersFormat.fontItalic());
+    settings.endGroup();
+
     settings.endGroup();
 }
 
@@ -68,15 +78,7 @@ void LexerConfig::setFormat(const QTextCharFormat &format, formatType type)
         break;
 
     case numbers:
-        numberssFormat=format;
-        break;
-
-    case functions:
-        functionsFormat=format;
-        break;
-
-     case variables:
-        variablesFormat=format;
+        numbersFormat=format;
         break;
 
     case comments:
@@ -100,13 +102,7 @@ QTextCharFormat LexerConfig::getFormat(formatType type)
         return keywordsFormat;
 
     case numbers:
-        return numberssFormat;
-
-    case functions:
-        return functionsFormat;
-
-    case variables:
-        return variablesFormat;
+        return numbersFormat;
 
     case comments:
         return commentsFormat;
@@ -194,11 +190,23 @@ void cppLexer::highlightBlock(const QString &text)
         index = singleLineComment.indexIn(text, index + length);
     }
 
-    QRegExp preprocessComment("^#[^\n]*");
-    for(int index = preprocessComment.indexIn(text);index >= 0;)
+    QRegExp preprocess("^#[^\n]*");
+    for(int index = preprocess.indexIn(text);index >= 0;)
     {
-        int length = preprocessComment.matchedLength();
+        int length = preprocess.matchedLength();
         setFormat(index, length, LexerConfig::getFormat(LexerConfig::preprocess));
-        index = preprocessComment.indexIn(text, index + length);
+        index = preprocess.indexIn(text, index + length);
+    }
+
+    QRegExp number("\\W-?(0x(\\d|[a-f]|[A-F])+|\\d+)(\\W|\\s)");
+    for(int index = number.indexIn(text);index >= 0;)
+    {
+        int length = number.matchedLength();
+        //match \\w at the begin of the string and (\\W|\\s) at the end of it.
+        //so the real length of number of the string is length-2
+        index++;
+        length-=2;
+        setFormat(index, length, LexerConfig::getFormat(LexerConfig::numbers));
+        index = number.indexIn(text, index + length);
     }
 }
