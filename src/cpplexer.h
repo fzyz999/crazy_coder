@@ -21,7 +21,8 @@ public:
         keywords,
         numbers,
         comments,
-        preprocess
+        preprocess,
+        strings
     };
 
     static void setup();
@@ -36,6 +37,7 @@ private:
     static QTextCharFormat numbersFormat;
     static QTextCharFormat commentsFormat;
     static QTextCharFormat preprocessFormat;
+    static QTextCharFormat stringsFormat;
 };
 
 class cppLexer : public QSyntaxHighlighter

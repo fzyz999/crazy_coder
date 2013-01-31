@@ -4,6 +4,7 @@ QTextCharFormat LexerConfig::keywordsFormat;
 QTextCharFormat LexerConfig::numbersFormat;
 QTextCharFormat LexerConfig::commentsFormat;
 QTextCharFormat LexerConfig::preprocessFormat;
+QTextCharFormat LexerConfig::stringsFormat;
 
 void LexerConfig::setup()
 {
@@ -32,6 +33,12 @@ void LexerConfig::setup()
     numbersFormat.setForeground(settings.value("Foreground",Qt::darkBlue).value<QBrush>());
     numbersFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
     numbersFormat.setFontItalic(settings.value("FontItalic",false).toBool());
+    settings.endGroup();
+
+    settings.beginGroup("strings");
+    stringsFormat.setForeground(settings.value("Foreground",Qt::darkRed).value<QBrush>());
+    stringsFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
+    stringsFormat.setFontItalic(settings.value("FontItalic",false).toBool());
     settings.endGroup();
 
     settings.endGroup();
@@ -66,6 +73,12 @@ void LexerConfig::shutdown()
     settings.setValue("FontItalic",numbersFormat.fontItalic());
     settings.endGroup();
 
+    settings.beginGroup("strings");
+    settings.setValue("Foreground",stringsFormat.foreground());
+    settings.setValue("FontWeight",stringsFormat.fontWeight());
+    settings.setValue("FontItalic",stringsFormat.fontItalic());
+    settings.endGroup();
+
     settings.endGroup();
 }
 
@@ -89,6 +102,10 @@ void LexerConfig::setFormat(const QTextCharFormat &format, formatType type)
         preprocessFormat=format;
         break;
 
+    case strings:
+        stringsFormat=format;
+        break;
+
     default:
         qWarning()<<"LexerConfig::getFormat(formatType): undefined formatType!";
     }
@@ -109,6 +126,9 @@ QTextCharFormat LexerConfig::getFormat(formatType type)
 
     case preprocess:
         return preprocessFormat;
+
+    case strings:
+        return stringsFormat;
 
     default:
         qWarning()<<"LexerConfig::getFormat(formatType): undefined formatType!";
@@ -190,14 +210,6 @@ void cppLexer::highlightBlock(const QString &text)
         index = singleLineComment.indexIn(text, index + length);
     }
 
-    QRegExp preprocess("^#[^\n]*");
-    for(int index = preprocess.indexIn(text);index >= 0;)
-    {
-        int length = preprocess.matchedLength();
-        setFormat(index, length, LexerConfig::getFormat(LexerConfig::preprocess));
-        index = preprocess.indexIn(text, index + length);
-    }
-
     QRegExp number("\\W-?(0x(\\d|[a-f]|[A-F])+|\\d+)(\\W|\\s)");
     for(int index = number.indexIn(text);index >= 0;)
     {
@@ -208,5 +220,22 @@ void cppLexer::highlightBlock(const QString &text)
         length-=2;
         setFormat(index, length, LexerConfig::getFormat(LexerConfig::numbers));
         index = number.indexIn(text, index + length);
+    }
+
+    QRegExp string("\".*\"");
+    string.setMinimal(true);
+    for(int index = string.indexIn(text);index >= 0;)
+    {
+        int length = string.matchedLength();
+        setFormat(index, length, LexerConfig::getFormat(LexerConfig::strings));
+        index = string.indexIn(text, index + length);
+    }
+
+    QRegExp preprocess("^#[^\n]*");
+    for(int index = preprocess.indexIn(text);index >= 0;)
+    {
+        int length = preprocess.matchedLength();
+        setFormat(index, length, LexerConfig::getFormat(LexerConfig::preprocess));
+        index = preprocess.indexIn(text, index + length);
     }
 }

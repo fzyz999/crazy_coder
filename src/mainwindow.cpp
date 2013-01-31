@@ -3,6 +3,11 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    setWindowIcon(QIcon(":/images/logo.png"));
+
+
+    QString locale = QLocale::system().name();
+
     tabManager=new TabManager(this);
     setCentralWidget(tabManager);
 
@@ -23,10 +28,13 @@ void MainWindow::create_menus()
     fileMenu->addAction(tr("&open"),tabManager,SLOT(open_file()));
     fileMenu->addSeparator();
     fileMenu->addAction(tr("&save"),tabManager,SLOT(save()));
-    fileMenu->addAction(tr("&save all"),tabManager,SLOT(save_all()));
+    fileMenu->addAction(tr("save all"),tabManager,SLOT(save_all()));
     fileMenu->addSeparator();
     fileMenu->addAction(tr("&quit"),this,SLOT(close()));
 
+    QMenu *helpMenu=menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(tr("&about"),this,SLOT(about()));
+    helpMenu->addAction(tr("about Qt"),this,SLOT(aboutQt()));
 }
 
 void MainWindow::save_settings()
@@ -51,4 +59,14 @@ void MainWindow::closeEvent(QCloseEvent *)
 {
     save_settings();
     LexerConfig::shutdown();
+}
+
+void MainWindow::about()
+{
+    QMessageBox::about(this,tr("About"),tr("Crazy Coder is a light IDE for OIer/ACMer"));
+}
+
+void MainWindow::aboutQt()
+{
+    QMessageBox::aboutQt(this,tr("about Qt"));
 }

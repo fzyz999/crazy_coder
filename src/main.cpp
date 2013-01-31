@@ -8,6 +8,8 @@
 
 #include <QApplication>
 #include <QSettings>
+#include <QTranslator>
+#include <QLocale>
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
@@ -17,6 +19,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Crazy Coder Team");
     QCoreApplication::setApplicationName("Crazy Coder");
     QCoreApplication::setApplicationVersion("0.0.1");
+
+    QTranslator translator;
+    translator.load(QLocale::system().name());
+    a.installTranslator(&translator);
 
     MainWindow w;
     w.show();

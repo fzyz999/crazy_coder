@@ -14,3 +14,8 @@ SOURCES += \
     codeeditor.cpp \
     tabmanager.cpp \
     cpplexer.cpp
+
+RESOURCES += \
+    rc.qrc
+
+TRANSLATIONS += zh_CN.ts
