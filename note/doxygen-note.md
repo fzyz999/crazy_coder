@@ -31,35 +31,47 @@ Unix Man Page
 　　doxygen会将按特殊格式书写的注释转为文档
 ##注释风格##
 　　通常代码可以附上一个注释块来对代码进行解释，一个注释块由一行或者多行组成。通常一个注释块包括一个简要说明（brief）和一个详细说明（detailed），这两部分都是可选的。 可以有多种方式标识出doxygen可识别的注释块。
->1.JavaDoc类型的多行注释。
->>/**
->>/...text...
->>*/
->2.QT样式的多行注释。
->>/*!
->>/...text...
->>*/
->3.使用至少两行c++注释块，在每行开始处加斜杠或惊叹号
->>///
->>/// …text….
->>///
->或
->>//!
->>//! …text….
->>//!
+1.JavaDoc类型的多行注释。
+
+        /**
+        /...text...
+        */
+        
+2.QT样式的多行注释。
+
+        /*!
+        /...text...
+        */
+        
+3.使用至少两行c++注释块，在每行开始处加斜杠或惊叹号
+
+        ///
+        /// …text….
+        ///
+        
+或
+
+        //!
+        //! …text….
+        //!
 
 ##简明描述##
 　　简明描述有多种可行方式
-　　在注释块头部使用\brief命令。这个命令在自然段结束时结束，空一行后紧接详细描述。例如：
->/*! \brief Brief description.
->*         Brief description continued.
->*
->*  Detailed description starts here.
->*/
+　　在注释块头部使用\brief命令。这个命令在自然段结束时结束，空一行后紧接详细描述。例如
+        
+        /*! \brief Brief description.
+        *         Brief description continued.
+        *
+        *  Detailed description starts here.
+        */
+           
 　　其余方式详见doxygen文档。
+
 　　其他在注释块中常用的命令：
+        
         \\mainpage 主页
         \\class 类名
         \\fn 函数名
         \\struct 结构体名
         \\union 联合名
+        
