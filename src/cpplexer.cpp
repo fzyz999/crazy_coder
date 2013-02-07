@@ -1,143 +1,143 @@
 #include "cpplexer.h"
 
-QTextCharFormat LexerConfig::keywordsFormat;
-QTextCharFormat LexerConfig::numbersFormat;
-QTextCharFormat LexerConfig::commentsFormat;
-QTextCharFormat LexerConfig::preprocessFormat;
-QTextCharFormat LexerConfig::stringsFormat;
+QTextCharFormat LexerConfig::textFormat[LexerConfig::count];
 
-void LexerConfig::setup()
+QString LexerConfig::getTypeNameFromIndex(const int &index)
+{
+    switch (index)
+    {
+    case keywords:
+        return QString("keywords");
+        break;
+
+    case numbers:
+        return QString("numbers");
+        break;
+
+    case comments:
+        return QString("comments");
+        break;
+
+    case preprocess:
+        return QString("preprocess");
+        break;
+
+    case strings:
+        return QString("strings");
+        break;
+
+    default:
+        qWarning()<<"LexerConfig::getFormat(formatType): undefined formatType!";
+        return QString("");
+    }
+}
+
+LexerConfig::formatType LexerConfig::getFormatTypeFromIndex(const int &index)
+{
+    switch (index)
+    {
+    case keywords:
+        return keywords;
+        break;
+
+    case numbers:
+        return numbers;
+        break;
+
+    case comments:
+        return comments;
+        break;
+
+    case preprocess:
+        return preprocess;
+        break;
+
+    case strings:
+        return strings;
+        break;
+
+    default:
+        qWarning()<<"LexerConfig::getFormat(formatType): undefined formatType!";
+        return count;
+    }
+}
+
+LexerConfig::formatType LexerConfig::getFormatTypeFromName(const QString &name)
+{
+    if(name == QString("keywords"))
+        return keywords;
+    if(name == QString("numbers"))
+        return numbers;
+    if(name == QString("comments"))
+        return comments;
+    if(name == QString("preprocess"))
+        return preprocess;
+    if(name == QString("strings"))
+        return strings;
+
+    qWarning()<<"LexerConfig::getFormat(formatType): undefined formatType!";
+    return count;
+}
+
+void LexerConfig::restore_settings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("LexerConfig");
 
-    settings.beginGroup("keywords");
-    keywordsFormat.setForeground(settings.value("Foreground",Qt::darkBlue).value<QBrush>());
-    keywordsFormat.setFontWeight(settings.value("FontWeight",QFont::Bold).toInt());
-    keywordsFormat.setFontItalic(settings.value("FontItalic",false).toBool());
-    settings.endGroup();
-
-    settings.beginGroup("comments");
-    commentsFormat.setForeground(settings.value("Foreground",Qt::blue).value<QBrush>());
-    commentsFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
-    commentsFormat.setFontItalic(settings.value("FontItalic",true).toBool());
-    settings.endGroup();
-
-    settings.beginGroup("preprocess");
-    preprocessFormat.setForeground(settings.value("Foreground",Qt::darkGreen).value<QBrush>());
-    preprocessFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
-    preprocessFormat.setFontItalic(settings.value("FontItalic",false).toBool());
-    settings.endGroup();
-
-    settings.beginGroup("numbers");
-    numbersFormat.setForeground(settings.value("Foreground",Qt::darkBlue).value<QBrush>());
-    numbersFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
-    numbersFormat.setFontItalic(settings.value("FontItalic",false).toBool());
-    settings.endGroup();
-
-    settings.beginGroup("strings");
-    stringsFormat.setForeground(settings.value("Foreground",Qt::darkRed).value<QBrush>());
-    stringsFormat.setFontWeight(settings.value("FontWeight",QFont::Normal).toInt());
-    stringsFormat.setFontItalic(settings.value("FontItalic",false).toBool());
-    settings.endGroup();
+    for(int i=0;i<LexerConfig::count;i++)
+    {
+        settings.beginGroup(getTypeNameFromIndex(i));
+        textFormat[i].setForeground(settings.value("Foreground").value<QBrush>());
+        textFormat[i].setFontWeight(settings.value("FontWeight").toInt());
+        textFormat[i].setFontItalic(settings.value("FontItalic").toBool());
+        settings.endGroup();
+    }
 
     settings.endGroup();
 }
 
-void LexerConfig::shutdown()
+void LexerConfig::save_settings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("LexerConfig");
 
-    settings.beginGroup("keywords");
-    settings.setValue("Foreground",keywordsFormat.foreground());
-    settings.setValue("FontWeight",keywordsFormat.fontWeight());
-    settings.setValue("FontItalic",keywordsFormat.fontItalic());
-    settings.endGroup();
-
-    settings.beginGroup("comments");
-    settings.setValue("Foreground",commentsFormat.foreground());
-    settings.setValue("FontWeight",commentsFormat.fontWeight());
-    settings.setValue("FontItalic",commentsFormat.fontItalic());
-    settings.endGroup();
-
-    settings.beginGroup("preprocess");
-    settings.setValue("Foreground",preprocessFormat.foreground());
-    settings.setValue("FontWeight",preprocessFormat.fontWeight());
-    settings.setValue("FontItalic",preprocessFormat.fontItalic());
-    settings.endGroup();
-
-    settings.beginGroup("numbers");
-    settings.setValue("Foreground",numbersFormat.foreground());
-    settings.setValue("FontWeight",numbersFormat.fontWeight());
-    settings.setValue("FontItalic",numbersFormat.fontItalic());
-    settings.endGroup();
-
-    settings.beginGroup("strings");
-    settings.setValue("Foreground",stringsFormat.foreground());
-    settings.setValue("FontWeight",stringsFormat.fontWeight());
-    settings.setValue("FontItalic",stringsFormat.fontItalic());
-    settings.endGroup();
+    for(int i=0;i<LexerConfig::count;i++)
+    {
+        settings.beginGroup(getTypeNameFromIndex(i));
+        settings.setValue("Foreground",textFormat[i].foreground());
+        settings.setValue("FontWeight",textFormat[i].fontWeight());
+        settings.setValue("FontItalic",textFormat[i].fontItalic());
+        settings.endGroup();
+    }
 
     settings.endGroup();
 }
 
 void LexerConfig::setFormat(const QTextCharFormat &format, formatType type)
 {
-    switch (type)
-    {
-    case keywords:
-        keywordsFormat=format;
-        break;
-
-    case numbers:
-        numbersFormat=format;
-        break;
-
-    case comments:
-        commentsFormat=format;
-        break;
-
-    case preprocess:
-        preprocessFormat=format;
-        break;
-
-    case strings:
-        stringsFormat=format;
-        break;
-
-    default:
-        qWarning()<<"LexerConfig::getFormat(formatType): undefined formatType!";
-    }
+    Q_ASSERT(type<count);
+    textFormat[type]=format;
 }
 
 QTextCharFormat LexerConfig::getFormat(formatType type)
 {
-    switch (type)
-    {
-    case keywords:
-        return keywordsFormat;
-
-    case numbers:
-        return numbersFormat;
-
-    case comments:
-        return commentsFormat;
-
-    case preprocess:
-        return preprocessFormat;
-
-    case strings:
-        return stringsFormat;
-
-    default:
-        qWarning()<<"LexerConfig::getFormat(formatType): undefined formatType!";
-        return QTextCharFormat();
-    }
+    Q_ASSERT(type<count);
+    return textFormat[type];
 }
 
-cppLexer::cppLexer(QTextDocument *parent):
-    QSyntaxHighlighter(parent)
+cppLexer::cppLexer(QPlainTextEdit *parent):
+    QSyntaxHighlighter(parent->document())
+{
+    init(parent);
+}
+
+cppLexer::cppLexer(QTextEdit *parent):
+    QSyntaxHighlighter(parent->document())
+{
+    init(parent);
+}
+
+void cppLexer::init(QWidget* parent)
 {
     QStringList datatype;
     datatype<<"double"<<"short"<<"bool"<<"int"<<"signed"

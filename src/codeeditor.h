@@ -10,20 +10,25 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFont>
+#include <QColor>
 
 #include "cpplexer.h"
+#include "gcc.h"
 
 class cppLexer;
 
 class CodeEditorConfig
 {
 public:
-    static void setLinenumAreaColor(QColor &color); //font color will be complute automatically
+    static void setLinenumAreaColor(const QColor &color); //font color will be complute automatically
     static const QColor& getLineumAreaBackgroundColor();
     static const QColor& getLineumAreaFontColor();
 
-    static void setEditorFont(QFont &font);
+    static void setEditorFont(const QFont &font);
     static const QFont& getEditorFont();
+
+    static void restore_settings();
+    static void save_settings();
 
 private:
     CodeEditorConfig();
@@ -78,6 +83,9 @@ public:
     bool isModified();
     void setModified(const bool& flag);
 
+    void compile();
+
+    static gcc cc;
     friend class cppLexer;
 
 protected:

@@ -148,14 +148,23 @@ void TabManager::on_tab_close_requested(int index)
 {
     CodeEditor *tab=qobject_cast<CodeEditor *>(widget(index));
 
-    if(tab->close())
+    if(tab!=NULL && tab->close())
     {
             removeTab(index);
             tab->deleteLater();
     }
+
 }
 
 void TabManager::on_current_tab_change(int index)
 {
     currentEditor=qobject_cast<CodeEditor *>(widget(index));
+}
+
+void TabManager::compile_current_file()
+{
+    if(Q_LIKELY(currentEditor!=NULL))
+    {
+        currentEditor->compile();
+    }
 }

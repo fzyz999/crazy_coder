@@ -11,9 +11,15 @@ MainWindow::MainWindow(QWidget *parent)
     tabManager=new TabManager(this);
     setCentralWidget(tabManager);
 
+    compilerDock=new compilerDockWidget(this);
+    addDockWidget(Qt::BottomDockWidgetArea,compilerDock);
+    compilerDock->setCompiler(&CodeEditor::cc);
+
     create_menus();
+
     restore_settings();
-    LexerConfig::setup();
+    LexerConfig::restore_settings();
+    CodeEditorConfig::restore_settings();
 }
 
 MainWindow::~MainWindow()
@@ -31,6 +37,19 @@ void MainWindow::create_menus()
     fileMenu->addAction(tr("save all"),tabManager,SLOT(save_all()));
     fileMenu->addSeparator();
     fileMenu->addAction(tr("&quit"),this,SLOT(close()));
+
+    QMenu *editMenu=menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(tr("&undo"),tabManager,SLOT(undo()));
+    editMenu->addAction(tr("&redo"),tabManager,SLOT(redo()));
+    editMenu->addSeparator();
+    editMenu->addAction(tr("&cut"),tabManager,SLOT(cut()));
+    editMenu->addAction(tr("&copy"),tabManager,SLOT(copy()));
+    editMenu->addAction(tr("&paste"),tabManager,SLOT(paste()));
+    editMenu->addSeparator();
+    editMenu->addAction(tr("&preference"),this,SLOT(preference()));
+
+     QMenu *buildMenu=menuBar()->addMenu(tr("&Build"));
+     buildMenu->addAction(tr("&compile"),tabManager,SLOT(compile_current_file()));
 
     QMenu *helpMenu=menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(tr("&about"),this,SLOT(about()));
@@ -58,7 +77,8 @@ void MainWindow::restore_settings()
 void MainWindow::closeEvent(QCloseEvent *)
 {
     save_settings();
-    LexerConfig::shutdown();
+    LexerConfig::save_settings();
+    CodeEditorConfig::save_settings();
 }
 
 void MainWindow::about()
@@ -69,4 +89,9 @@ void MainWindow::about()
 void MainWindow::aboutQt()
 {
     QMessageBox::aboutQt(this,tr("about Qt"));
+}
+
+void MainWindow::preference()
+{
+    tabManager->addTab(new editorConfigDlg(this),tr("preference"));
 }

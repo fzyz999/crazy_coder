@@ -47,8 +47,10 @@ public slots:
     void cut();
     void paste();
     void select_all();
+    void compile_current_file();
     void on_tab_close_requested(int index);
     void on_current_tab_change(int index);
+
 
 private:
     int tab_count;

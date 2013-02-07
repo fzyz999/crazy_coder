@@ -11,18 +11,16 @@
 /*!
  * \brief linenumAreaBackgroundColor is the background color of line-number area.
  */
-QColor CodeEditorConfig::linenumAreaBackgroundColor=QColor(Qt::lightGray);
+QColor CodeEditorConfig::linenumAreaBackgroundColor;
 QColor
 /*!
  * \brief linenumAreaFontColor is the font color of line-number area.
  */
-CodeEditorConfig::linenumAreaFontColor=QColor((0x7f+linenumAreaBackgroundColor.red())&0xff,
-                                                     (0x7f+linenumAreaBackgroundColor.green())&0xff,
-                                                     (0x7f+linenumAreaBackgroundColor.blue())&0xff);
+CodeEditorConfig::linenumAreaFontColor;
 /*!
  * \brief editorFont is the font of the editor
  */
-QFont CodeEditorConfig::editorFont("mono");
+QFont CodeEditorConfig::editorFont;
 
 /*!
  * \brief a private constructor to prevent CodeEditorConfig class from being instantiated.
@@ -37,12 +35,12 @@ CodeEditorConfig::CodeEditorConfig()
  *\brief set the background color of the LinenumArea. The font color of it will be compute automatically according to the background color.
 * \param color the color of the background.
 */
-void CodeEditorConfig::setLinenumAreaColor(QColor &color)
+void CodeEditorConfig::setLinenumAreaColor(const QColor &color)
 {
     linenumAreaBackgroundColor=color;
-    linenumAreaFontColor=QColor((0xff+linenumAreaBackgroundColor.red())&0xff,
-                                (0xff+linenumAreaBackgroundColor.green())&0xff,
-                                (0xff+linenumAreaBackgroundColor.blue())&0xff);
+    linenumAreaFontColor=QColor((0x7f+linenumAreaBackgroundColor.red())&0xff,
+                                (0x7f+linenumAreaBackgroundColor.green())&0xff,
+                                (0x7f+linenumAreaBackgroundColor.blue())&0xff);
 }
 /*!
  * \brief get the background color of the LinenumArea.
@@ -65,7 +63,7 @@ const QColor& CodeEditorConfig::getLineumAreaFontColor()
  * \brief set the font of the editor.
  * \param font the font of the editor will be set.
  */
-void CodeEditorConfig::setEditorFont(QFont &font)
+void CodeEditorConfig::setEditorFont(const QFont &font)
 {
     editorFont=font;
 }
@@ -75,6 +73,28 @@ void CodeEditorConfig::setEditorFont(QFont &font)
 const QFont& CodeEditorConfig::getEditorFont()
 {
     return editorFont;
+}
+
+void CodeEditorConfig::restore_settings()
+{
+    QSettings settings("settings.ini",QSettings::IniFormat);
+    settings.beginGroup("CodeEditorConfig");
+
+    setLinenumAreaColor(settings.value("linenumAreaBackgroundColor").value<QColor>());
+    editorFont=settings.value("editorFornt").value<QFont>();
+
+    settings.endGroup();
+}
+
+void CodeEditorConfig::save_settings()
+{
+    QSettings settings("settings.ini",QSettings::IniFormat);
+    settings.beginGroup("CodeEditorConfig");
+
+    settings.setValue("linenumAreaBackgroundColor",CodeEditorConfig::getLineumAreaBackgroundColor());
+    settings.setValue("editorFornt",CodeEditorConfig::getEditorFont());
+
+    settings.endGroup();
 }
 
 /*!
@@ -123,6 +143,8 @@ int LinenumArea::getAreaWidth()
  * \brief CodeEditor class is a code editor widget with lexer and LinenumArea widget.
  */
 
+gcc CodeEditor::cc;
+
 /*!
  * \brief initialize the CodeEditor
  *
@@ -142,7 +164,7 @@ CodeEditor::CodeEditor(QWidget *parent):
     lineNumArea=new LinenumArea(this);
     isFileNameChanged=false;
     modified=false;
-    lexer=new cppLexer(this->document());
+    lexer=new cppLexer(this);
     editorLanguageMode=CodeEditor::cpp;
 
     lineNumberAreaWidth();
@@ -392,4 +414,9 @@ void CodeEditor::lineNumPaintEvent(QPaintEvent *e)
         bottom = top + (int) blockBoundingRect(block).height();
         blockNumber++;
     }
+}
+
+void CodeEditor::compile()
+{
+    cc.startCompile(file.fileName());
 }

@@ -8,6 +8,8 @@
 #include "codeeditor.h"
 #include "tabmanager.h"
 #include "cpplexer.h"
+#include "comipler.h"
+#include "editorconfigdlg.h"
 
 class MainWindow : public QMainWindow
 {
@@ -20,12 +22,14 @@ public:
 public slots:
     void about();
     void aboutQt();
+    void preference();
 
 protected:
     void closeEvent(QCloseEvent *);
 
 private:
     TabManager *tabManager;
+    compilerDockWidget *compilerDock;
 
     void create_menus();
     void save_settings();

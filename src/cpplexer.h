@@ -8,6 +8,8 @@
 #include <QStringList>
 #include <QSyntaxHighlighter>
 #include <QDebug>
+#include <QCompleter>
+#include <QAbstractItemView>
 
 #include "codeeditor.h"
 
@@ -22,22 +24,22 @@ public:
         numbers,
         comments,
         preprocess,
-        strings
+        strings,
+        count   //the number of format-types
     };
 
-    static void setup();
-    static void shutdown();
+    static void restore_settings();
+    static void save_settings();
 
     static QTextCharFormat getFormat(formatType type);
+    static QString getTypeNameFromIndex(const int &index);
+    static formatType getFormatTypeFromName(const QString &name);
+    static formatType getFormatTypeFromIndex(const int &index);
     static void setFormat(const QTextCharFormat& format, formatType type);
 
 private:
     LexerConfig(){}
-    static QTextCharFormat keywordsFormat;
-    static QTextCharFormat numbersFormat;
-    static QTextCharFormat commentsFormat;
-    static QTextCharFormat preprocessFormat;
-    static QTextCharFormat stringsFormat;
+    static QTextCharFormat textFormat[count];
 };
 
 class cppLexer : public QSyntaxHighlighter
@@ -45,16 +47,18 @@ class cppLexer : public QSyntaxHighlighter
     Q_OBJECT
 
 public:
-    cppLexer(QTextDocument *parent);
+    cppLexer(QPlainTextEdit *parent);
+    cppLexer(QTextEdit *parent);
     ~cppLexer();
 
 protected:
     void highlightBlock(const QString &text);
 
 private:
+    void init(QWidget* parent);
     QList<QRegExp> keywords_datatype;
     QList<QRegExp> keywords_others;
-
+    QCompleter *completer;
 };
 
 #endif // CPPLEXER_H
