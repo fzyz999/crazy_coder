@@ -75,7 +75,7 @@ const QFont& CodeEditorConfig::getEditorFont()
     return editorFont;
 }
 
-void CodeEditorConfig::restore_settings()
+void CodeEditorConfig::restoreSettings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("CodeEditorConfig");
@@ -86,7 +86,7 @@ void CodeEditorConfig::restore_settings()
     settings.endGroup();
 }
 
-void CodeEditorConfig::save_settings()
+void CodeEditorConfig::saveSettings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("CodeEditorConfig");
@@ -159,10 +159,9 @@ CodeEditor::CodeEditor(QWidget *parent):
 {
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(lineNumberAreaWidth()));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
-    connect(this,SIGNAL(textChanged()),this,SLOT(onTextChanged()));
+    connect(this->document(),SIGNAL(modificationChanged(bool)),this,SLOT(onModificationChanged(bool)));
 
     lineNumArea=new LinenumArea(this);
-    isFileNameChanged=false;
     modified=false;
     lexer=new cppLexer(this);
     editorLanguageMode=CodeEditor::cpp;
@@ -183,7 +182,10 @@ bool CodeEditor::open(const QString &filePath)
     {
         QTextStream dataIn(&file);
         setPlainText(dataIn.readAll());
-        modified=false;
+
+        QFileInfo info(file);
+        setDocumentTitle(info.fileName());
+        emit filenameChanged(documentTitle());
 
         file.close();
         return true;
@@ -208,11 +210,14 @@ bool CodeEditor::save()
         //if getSaveFileName() is canceled by user
         if(file.fileName().isEmpty())
         {
-            isFileNameChanged=false;
             return false;
         }
 
-        isFileNameChanged=true;
+
+        QFileInfo info(file);
+        setDocumentTitle(info.fileName());
+        emit filenameChanged(documentTitle());
+
     }
 
     if(file.open(QIODevice::WriteOnly))
@@ -224,43 +229,17 @@ bool CodeEditor::save()
         return false;
 
     file.close();
-    modified=false;
+    document()->setModified(false);
     return true;
-}
-
-/*!
- * \brief Because the text has been modified, modified should be true.
- */
-void CodeEditor::onTextChanged()
-{
-    setModified(true);
-}
-
-/*!
- * \brief set whether the text has been modified
- * \param flag Has the text been modified? true or false
- */
-void CodeEditor::setModified(const bool &flag)
-{
-    modified=flag;
-}
-
-/*!
- * \brief is the text modified
- * \return true if the text has been modified, otherwise return false.
- */
-bool CodeEditor::isModified()
-{
-    return modified;
 }
 
 /*!
  * \brief save the unsaved file when close.
  * \return true if the file has been saved, otherwise return false.
  */
-bool CodeEditor::close()
+void CodeEditor::closeEvent(QCloseEvent *e)
 {
-    if(isModified())
+    if(this->document()->isModified())
     {
         QMessageBox msgbox(this);
 
@@ -285,18 +264,18 @@ bool CodeEditor::close()
                 msgbox.setIcon(QMessageBox::Warning);
 
                 msgbox.exec();
-                return false;
+                e->ignore();
             }
 
             break;
         case QMessageBox::Discard:
             // Don't Save was clicked
-            return true;
+            e->accept();
 
             break;
         case QMessageBox::Cancel:
             // Cancel was clicked
-            return false;
+            e->ignore();
 
             break;
         default:
@@ -305,36 +284,10 @@ bool CodeEditor::close()
             break;
         }
     }
+    else
+        e->accept();
 
-    return true;
-}
-
-/*!
- * \brief is filename changed
- * \return true if the filename has been changed, otherwise return false.
- */
-bool CodeEditor::is_filename_changed()
-{
-    return isFileNameChanged;
-}
-
-/*!
- * \brief returns the name of the file, excluding the path.
- * \return the name of the file
- */
-QString CodeEditor::get_file_name()
-{
-    QFileInfo fileInfo(file);
-    return fileInfo.fileName();
-}
-
-/*!
- * \brief set whether the filename has been changed
- * \param flag Has the filename has been changed? true or false
- */
-void CodeEditor::set_filename_changed(const bool &bl)
-{
-    isFileNameChanged=bl;
+    return ;
 }
 
 /*!
@@ -419,4 +372,16 @@ void CodeEditor::lineNumPaintEvent(QPaintEvent *e)
 void CodeEditor::compile()
 {
     cc.startCompile(file.fileName());
+}
+
+void CodeEditor::onModificationChanged(bool changed)
+{
+    if(changed)
+    {
+        emit filenameChanged("*"+documentTitle());
+    }
+    else
+    {
+        emit filenameChanged(documentTitle());
+    }
 }

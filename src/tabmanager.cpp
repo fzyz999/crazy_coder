@@ -15,8 +15,7 @@ TabManager::TabManager(QWidget *parent) :
     setTabPosition(QTabWidget::North);
     tab_count=1;
     new_file_count=1;
-    currentEditor=NULL;
-
+    isEditor=false;
 }
 
 void TabManager::open_file()
@@ -70,25 +69,25 @@ void TabManager::new_file()
 
 void TabManager::save()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
     {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
+
         if(Q_UNLIKELY(!currentEditor->save()))
         {
             QErrorMessage error(this);
             error.showMessage(tr("Saving file failed!"));
             error.exec();
         }
-        else if(currentEditor->is_filename_changed())
-        {
-            setTabText(currentIndex(),currentEditor->get_file_name());
-            currentEditor->set_filename_changed(false);
-        }
     }
 }
 
 void TabManager::save_all()
 {
-    for(int i=count();i>0;i--)
+    int i=count();
+    while(i--)
     {
         CodeEditor *editor=qobject_cast<CodeEditor *>(widget(i-1));
 
@@ -100,71 +99,143 @@ void TabManager::save_all()
                 error.showMessage(tr("Saving file failed!"));
                 error.exec();
             }
-            else if(editor->is_filename_changed())
-            {
-                setTabText(i-1,editor->get_file_name());
-            }
         }
     }
 }
 
 void TabManager::undo()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
+    {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
         currentEditor->undo();
+    }
 }
 
 void TabManager::redo()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
+    {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
         currentEditor->redo();
+    }
 }
 
 void TabManager::copy()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
+    {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
         currentEditor->copy();
+    }
 }
 
 void TabManager::cut()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
+    {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
         currentEditor->cut();
+    }
 }
 
 void TabManager::paste()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
+    {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
         currentEditor->paste();
+    }
 }
 
 void TabManager::select_all()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
+    {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
         currentEditor->selectAll();
+    }
 }
 
 void TabManager::on_tab_close_requested(int index)
 {
-    CodeEditor *tab=qobject_cast<CodeEditor *>(widget(index));
+    QWidget *tab=widget(index);
 
-    if(tab!=NULL && tab->close())
+    if(tab!=NULL)
     {
+        tab->setAttribute(Qt::WA_DeleteOnClose,true);
+        if(tab->close())
             removeTab(index);
-            tab->deleteLater();
     }
 
 }
 
 void TabManager::on_current_tab_change(int index)
 {
-    currentEditor=qobject_cast<CodeEditor *>(widget(index));
+    CodeEditor* editor=qobject_cast<CodeEditor *>(widget(index));
+    if(editor!=NULL)
+        isEditor=true;
+    else
+        isEditor=false;
 }
 
 void TabManager::compile_current_file()
 {
-    if(Q_LIKELY(currentEditor!=NULL))
+    if(Q_LIKELY(this->isEditor))
     {
+        CodeEditor *currentEditor=qobject_cast<CodeEditor *>(this->currentWidget());
+
+        Q_ASSERT(currentEditor!=NULL);
         currentEditor->compile();
+    }
+}
+
+void TabManager::closeEvent(QCloseEvent *e)
+{
+    e->accept();//set the accept flag
+    int i=count();
+    while(i--)
+    {
+        QWidget *page=widget(i);
+
+        if(!page->close())
+            e->ignore();//clean the accept flag
+    }
+}
+
+void TabManager::renameTabTitle(QString title)
+{
+    QWidget* page=qobject_cast<QWidget*>(sender());
+    if(page!=NULL)
+    {
+        setTabText(indexOf(page),title);
+    }
+    else
+        qWarning()<<"in TabManager::renameTabTitle(QString title): a wrong sender!";
+}
+
+void TabManager::tabRemoved(int index)
+{
+
+}
+
+void TabManager::tabInserted(int index)
+{
+    CodeEditor* editor=qobject_cast<CodeEditor *>(widget(index));
+    if(editor!=NULL)
+    {
+        connect(editor,SIGNAL(filenameChanged(QString)),this,SLOT(renameTabTitle(QString)));
     }
 }

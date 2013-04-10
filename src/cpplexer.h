@@ -15,8 +15,9 @@
 
 class CodeEditor;
 
-class LexerConfig
+class LexerConfig : public QObject
 {
+    Q_OBJECT
 public:
     enum formatType
     {
@@ -28,14 +29,17 @@ public:
         count   //the number of format-types
     };
 
-    static void restore_settings();
-    static void save_settings();
+    static void restoreSettings();
+    static void saveSettings();
 
     static QTextCharFormat getFormat(formatType type);
     static QString getTypeNameFromIndex(const int &index);
     static formatType getFormatTypeFromName(const QString &name);
     static formatType getFormatTypeFromIndex(const int &index);
     static void setFormat(const QTextCharFormat& format, formatType type);
+
+signals:
+    void needRehighlight();
 
 private:
     LexerConfig(){}

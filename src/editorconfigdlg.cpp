@@ -7,9 +7,6 @@ editorConfigDlg::editorConfigDlg(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //connect(ui->checkBox_blod,SIGNAL(stateChanged(int)),this,SLOT(on_checkBox_blod_stateChanged(int)));
-    //connect(ui->listWidget,SIGNAL(itemSelectionChanged()),this,SLOT(on_listWidget_itemSelectionChanged()));
-
     setLayout(ui->verticalLayout_3);
     lexer=new cppLexer(ui->textBrowser);
 
@@ -18,6 +15,7 @@ editorConfigDlg::editorConfigDlg(QWidget *parent) :
     ui->pushButton_fgc->setGraphicsEffect(effect);
     ui->fontComboBox->setCurrentFont(CodeEditorConfig::getEditorFont());
     ui->spinBox->setValue(CodeEditorConfig::getEditorFont().pointSize());
+
 }
 
 editorConfigDlg::~editorConfigDlg()

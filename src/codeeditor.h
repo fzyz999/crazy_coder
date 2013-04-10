@@ -27,8 +27,8 @@ public:
     static void setEditorFont(const QFont &font);
     static const QFont& getEditorFont();
 
-    static void restore_settings();
-    static void save_settings();
+    static void restoreSettings();
+    static void saveSettings();
 
 private:
     CodeEditorConfig();
@@ -75,25 +75,21 @@ public:
     void lineNumPaintEvent(QPaintEvent *e);
     bool open(const QString& filePath);
     bool save();
-    bool close();
-    bool is_filename_changed();
-    void set_filename_changed(const bool &bl);
-    QString get_file_name();
-
-    bool isModified();
-    void setModified(const bool& flag);
 
     void compile();
 
     static gcc cc;
     friend class cppLexer;
 
+signals:
+    void filenameChanged(QString newName);
+
 protected:
     void resizeEvent(QResizeEvent *e);
+    void closeEvent(QCloseEvent *e);
 
 private:
     QFile file;
-    bool isFileNameChanged;
     bool modified;
     cppLexer *lexer;
     languageMode editorLanguageMode;
@@ -101,7 +97,7 @@ private:
 private slots:
     void lineNumberAreaWidth();
     void updateLineNumberArea(const QRect &rect, int dy);
-    void onTextChanged();
+    void onModificationChanged(bool changed);
 
 private:
     LinenumArea *lineNumArea;

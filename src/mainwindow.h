@@ -25,15 +25,15 @@ public slots:
     void preference();
 
 protected:
-    void closeEvent(QCloseEvent *);
+    void closeEvent(QCloseEvent *e);
 
 private:
     TabManager *tabManager;
     compilerDockWidget *compilerDock;
 
-    void create_menus();
-    void save_settings();
-    void restore_settings();
+    void createMenus();
+    void saveSettings();
+    void restoreSettings();
 };
 
 #endif // MAINWINDOW_H

@@ -16,6 +16,11 @@ class editorConfigDlg;
 class editorConfigDlg : public QWidget
 {
     Q_OBJECT
+
+    struct configInfo
+    {
+
+    };
     
 public:
     explicit editorConfigDlg(QWidget *parent = 0);

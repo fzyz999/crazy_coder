@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowIcon(QIcon(":/images/logo.png"));
 
 
-    QString locale = QLocale::system().name();
+    //QString locale = QLocale::system().name();
 
     tabManager=new TabManager(this);
     setCentralWidget(tabManager);
@@ -15,18 +15,18 @@ MainWindow::MainWindow(QWidget *parent)
     addDockWidget(Qt::BottomDockWidgetArea,compilerDock);
     compilerDock->setCompiler(&CodeEditor::cc);
 
-    create_menus();
+    createMenus();
 
-    restore_settings();
-    LexerConfig::restore_settings();
-    CodeEditorConfig::restore_settings();
+    restoreSettings();
+    LexerConfig::restoreSettings();
+    CodeEditorConfig::restoreSettings();
 }
 
 MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::create_menus()
+void MainWindow::createMenus()
 {
     QMenu *fileMenu=menuBar()->addMenu(tr("&File"));
 
@@ -48,15 +48,15 @@ void MainWindow::create_menus()
     editMenu->addSeparator();
     editMenu->addAction(tr("&preference"),this,SLOT(preference()));
 
-     QMenu *buildMenu=menuBar()->addMenu(tr("&Build"));
-     buildMenu->addAction(tr("&compile"),tabManager,SLOT(compile_current_file()));
+    QMenu *buildMenu=menuBar()->addMenu(tr("&Build"));
+    buildMenu->addAction(tr("&compile"),tabManager,SLOT(compile_current_file()));
 
     QMenu *helpMenu=menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(tr("&about"),this,SLOT(about()));
     helpMenu->addAction(tr("about Qt"),this,SLOT(aboutQt()));
 }
 
-void MainWindow::save_settings()
+void MainWindow::saveSettings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("MainWindow");
@@ -65,7 +65,7 @@ void MainWindow::save_settings()
     settings.endGroup();
 }
 
-void MainWindow::restore_settings()
+void MainWindow::restoreSettings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("MainWindow");
@@ -74,11 +74,17 @@ void MainWindow::restore_settings()
     settings.endGroup();
 }
 
-void MainWindow::closeEvent(QCloseEvent *)
+void MainWindow::closeEvent(QCloseEvent *e)
 {
-    save_settings();
-    LexerConfig::save_settings();
-    CodeEditorConfig::save_settings();
+    if(tabManager->close())
+    {
+        saveSettings();
+        LexerConfig::saveSettings();
+        CodeEditorConfig::saveSettings();
+        e->accept();
+    }
+    else
+        e->ignore();
 }
 
 void MainWindow::about()

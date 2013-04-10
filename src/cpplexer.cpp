@@ -79,7 +79,7 @@ LexerConfig::formatType LexerConfig::getFormatTypeFromName(const QString &name)
     return count;
 }
 
-void LexerConfig::restore_settings()
+void LexerConfig::restoreSettings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("LexerConfig");
@@ -96,7 +96,7 @@ void LexerConfig::restore_settings()
     settings.endGroup();
 }
 
-void LexerConfig::save_settings()
+void LexerConfig::saveSettings()
 {
     QSettings settings("settings.ini",QSettings::IniFormat);
     settings.beginGroup("LexerConfig");
